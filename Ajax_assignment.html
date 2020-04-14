@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style>
+        #selans div{
+            border:1px solid;
+            border-color:teal;
+            padding:3px;
+            margin: 3px;
+            display: inline-block;
+        }
+        .cat{font-size: 0.7em}
+        .que{font-size: 1.5em}
+</style>
+</head>
+<body>
+    <div class="a">
+    <div id='score'></div>
+<button id='btn'>click me</button>
+<div id='output'></div>
+<div id='selans'></div>
+
+    <script> 
+        var answer={'correct':0,'wrong':0};
+        var output=document.getElementById('output');
+        var btn=document.getElementById('btn');
+        btn.addEventListener('click',nextItem);
+            var selans=document.getElementById('selans');
+
+        function nextItem()
+        {
+            btn.style.display='none'
+            var url='https://opentdb.com/api.php?amount=10';
+            requestajax(url,function(data){
+                console.log(data.results[0]);
+                var ob=data.results[1];
+                var html='';
+                html+='<div><div class="cat">'+ob.category+'</div><div class="que">'+ob.question+'</div></div>'
+                output.innerHTML=html;
+                quesbuilder(ob.correct_answer,ob.incorrect_answers)
+            })
+        }
+        function correctans()
+        {
+            var eles=document.querySelectorAll('#selans div');
+            for(var x=0;x<eles.length;x++)
+            {
+                if(eles[x].getAttribute('data-cor')=='true')
+                {
+                    return eles[x].innerText
+                }
+            }
+
+        }
+
+        function sendans()
+        {
+            var res=event.target.getAttribute('data-cor');
+            var right=correctans();
+            btn.style.display='block'
+            if(res=='true')
+            {
+                answer.correct++;
+                selans.innerHTML='correct!!!!!'
+            }else{
+                answer.wrong++;
+                selans.innerHTML='Wrong!! Correct answer is'+right;
+            }
+            document.getElementById('score').innerHTML='correct'+answer.correct+'  wrong'+answer.wrong;
+        }
+
+        function quesbuilder(cor,incor)
+        {
+            var holder=incor;
+            holder.push(cor);
+            holder.sort();
+            selans.innerHTML='';
+            for(var x=0;x<holder.length;x++)
+            {
+                var el=document.createElement('div')
+                var checker=holder[x]==cor?true:false;
+                el.setAttribute('data-cor',checker);
+                el.innerHTML=holder[x];
+                el.addEventListener('click',sendans);
+                selans.appendChild(el);
+            }
+        }
+        
+
+        function requestajax(url,callback)
+        {
+            var xhr=new XMLHttpRequest();
+            xhr.onreadystatechange=function()
+            {
+                if(xhr.readyState==4 && xhr.status==200)
+                {
+                    callback(JSON.parse(xhr.responseText));
+                }
+            }
+            xhr.open('GET',url,true);
+            xhr.send();
+        }
+    </script>
+</div>
+</body>
+</html>
